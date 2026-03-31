@@ -92,10 +92,13 @@ while True:
             color_image_pil.thumbnail((512, 512))
             result = client(color_image_pil)
 
-            print(type(result))
-            print(f'{result.shape=}')
+            if result is None:
+                logger.info("No people found in image!")
+                continue
+
+            result_img = Image.fromarray(np.uint8(result.numpy()))
 
             rr.log(
                 'pose_result',
-                rr.Image(Image.fromarray(result))
+                rr.Image(result_img)
             )

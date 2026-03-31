@@ -28,12 +28,14 @@ class Sam3DLocal():
         self,
         images: Image.Image,
     ):
-        # print(f'{type(images)=}')
-        # print(f'{images.shape=}')
         outputs = self.estimator.process_one_image(np.array(images))
+
+        if len(outputs) == 0:
+            return None
+
         rend_img = self.visualize_sample_together(np.array(images), outputs, self.estimator.faces)
 
-        return rend_img
+        return torch.tensor(rend_img)
 
 class Sam3DServer(ls.LitAPI):
     def setup(self, device):
@@ -76,16 +78,6 @@ class Sam3DClient():
             return torch.load(io.BytesIO(tensor_bytes))
         else:
             print(f'Sam3DClient Error: Response with status code {response.status_code} - {response.text}')
-
-# if __name__ == "__main__":
-    # print("hi")
-    # estimator = setup_sam_3d_body(hf_repo_id="facebook/sam-3d-body-dinov3")
-    # img_bgr = cv2.imread("/home/ronan/Pictures/football_player.png")
-    # outputs = estimator.process_one_image(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
-
-    # # Visualize and save results
-    # rend_img = visualize_sample_together(img_bgr, outputs, estimator.faces)
-    # cv2.imwrite("output.jpg", rend_img.astype(np.uint8))
 
 def test_local():
     sam3dlocal = Sam3DLocal()
