@@ -9,10 +9,11 @@ import pyrealsense2 as rs
 import numpy as np
 from PIL import Image
 
-import utils
+from camera_manager import select_camera
 from inference.sam import Sam3Client
 from inference.depth_pro import DepthProClient
-from camera_manager import select_camera
+from inference.sam3d import Sam3DClient
+import utils
 
 rr.init("ml_demos", spawn=True)
 
@@ -29,7 +30,8 @@ else:
     ip_addr = "localhost"
 
 # client = Sam3Client()
-client = DepthProClient()
+# client = DepthProClient()
+client = Sam3DClient()
 
 term_reader = utils.TerminalInputReader()
 print("Waiting for inference queries...")
@@ -83,4 +85,17 @@ while True:
             rr.log(
                 'depth_result',
                 rr.DepthImage(depth_img)
+            )
+        case 'sam3d' | 'pose':
+            logger.info("Running SAM3D Body")
+            color_image_pil = Image.fromarray(frame)
+            color_image_pil.thumbnail((512, 512))
+            result = client(color_image_pil)
+
+            print(type(result))
+            print(f'{result.shape=}')
+
+            rr.log(
+                'pose_result',
+                rr.Image(Image.fromarray(result))
             )
